@@ -1,0 +1,72 @@
+# IMX708 camera on the RDK X5 - sensor evidence, 2026-11-11 05:22 CST
+# Interfaces: MIPI CSI-2 (video, 2 lanes), I2C bus 6 @ 0x1a (control), V4L2 /dev/video8, ROS 2 node /imx708_cam
+
+sunrise@rdk-x5:~$ uname -r; cat /etc/version
+6.1.83
+3.5.0
+
+sunrise@rdk-x5:~$ lsmod | grep imx708
+imx708                 28672  1
+
+sunrise@rdk-x5:~$ sudo dmesg | grep -E "imx708 6-001a: (reset|chip|camera)"
+[    6.807173] imx708 6-001a: reset gpio 353, inclk 24000000 Hz
+[    6.814140] imx708 6-001a: chip id try 0: ret 0 val 0x708
+[    6.820146] imx708 6-001a: camera module ID 0x0301
+
+sunrise@rdk-x5:~$ cat /boot/config.txt
+v4l2_enable
+v4l2_scene=22
+dtoverlay=dtoverlay_cam0_imx708
+
+
+sunrise@rdk-x5:~$ systemctl is-active cam-service
+active
+
+sunrise@rdk-x5:~$ v4l2-ctl -d /dev/video8 --info | head -8
+Driver Info:
+	Driver name      : vs-video
+	Card type        : vs-video
+	Bus info         : platform:vscam
+	Driver version   : 6.1.83
+	Capabilities     : 0x84200001
+		Video Capture
+		Streaming
+
+sunrise@rdk-x5:~$ v4l2-ctl -d /dev/video8 --list-formats-ext
+ioctl: VIDIOC_ENUM_FMT
+	Type: Video Capture
+
+	[0]: 'NV12' (Y/UV 4:2:0)
+		Size: Stepwise 64x64 - 1920x1080 with step 2/2
+
+sunrise@rdk-x5:~$ python3 ~/imx708_ros/imx708_cam_node.py &
+[INFO] [1794345748.084304175] [imx708_cam]: IMX708 /dev/video8 -> /image_raw: 960x544 NV12 (stride 960)
+[INFO] [1794345753.090054666] [imx708_cam]: camera 56.6 fps
+
+sunrise@rdk-x5:~$ ros2 node list
+/imx708_cam
+
+sunrise@rdk-x5:~$ ros2 topic info /image_raw
+Type: sensor_msgs/msg/Image
+Publisher count: 1
+Subscription count: 0
+
+sunrise@rdk-x5:~$ ros2 topic hz /image_raw      # stopped after 5 s
+average rate: 56.046
+	min: 0.017s max: 0.019s std dev: 0.00026s window: 57
+average rate: 55.544
+	min: 0.016s max: 0.036s std dev: 0.00174s window: 113
+
+sunrise@rdk-x5:~$ timeout 6 ros2 topic echo /image_raw --once --no-arr | head -11
+header:
+  stamp:
+    sec: 1794345770
+    nanosec: 612652292
+  frame_id: camera
+height: 544
+width: 960
+encoding: nv12
+is_bigendian: 0
+step: 960
+data: '<sequence type: uint8, length: 783360>'
+

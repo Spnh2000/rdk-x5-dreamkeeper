@@ -1,0 +1,92 @@
+# YOLOv8n on the RDK X5 BPU, fed by the IMX708 camera - AI evidence, 2026-11-11 05:45 CST
+
+sunrise@rdk-x5:~$ ros2 launch ~/imx708_ros/imx708_yolo.launch.py      # running in another terminal; excerpt of its log:
+[imx708_cam-1] [INFO] [imx708_cam]: IMX708 /dev/video8 -> /image_raw: 960x544 NV12 (stride 960)
+[imx708_cam-1] [INFO] [imx708_cam]: letterbox -> /image_yolo: 640x640 NV12 (picture 640x362 at x=0 y=138)
+[hobot_codec_republish-2] [WARN] [HobotVenc]: init_pic_w_: 640, init_pic_h_: 640, alined_pic_w_: 640, alined_pic_h_: 640, aline_w_: 16, aline_h_: 16
+[example-3] [WARN] [dnn_example]: Sub img fps: 60.34, Smart fps: 60.46, recved img time delay ms: 6, pre process time ms: 1, infer time ms: 7, post process time ms: 4, pipeline time ms: 18
+[example-3] [WARN] [dnn_example]: Sub img fps: 56.05, Smart fps: 56.05, recved img time delay ms: 6, pre process time ms: 1, infer time ms: 6, post process time ms: 3, pipeline time ms: 18
+[example-3] [WARN] [dnn_example]: Sub img fps: 56.05, Smart fps: 56.05, recved img time delay ms: 7, pre process time ms: 1, infer time ms: 6, post process time ms: 4, pipeline time ms: 19
+
+sunrise@rdk-x5:~$ ros2 node list
+/dnn_example
+/hobot_codec_encoder_45c11eed
+/imx708_cam
+/websocket
+
+sunrise@rdk-x5:~$ ros2 topic hz /hobot_dnn_detection      # stopped after 5 s
+average rate: 56.061
+	min: 0.015s max: 0.023s std dev: 0.00109s window: 58
+
+sunrise@rdk-x5:~$ ros2 topic echo /hobot_dnn_detection --once      # time stamps omitted
+header:
+  frame_id: camera
+fps: 56
+perfs:
+- type: yolov8n_640x640_nv12_recvedimg
+  time_ms_duration: 17.0
+- type: yolov8n_640x640_nv12_preprocess
+  time_ms_duration: 1.0
+- type: yolov8n_640x640_nv12_predict_infer
+  time_ms_duration: 7.0
+- type: yolov8n_640x640_nv12_predict_parse
+  time_ms_duration: 0.0
+- type: yolov8n_640x640_nv12_postprocess
+  time_ms_duration: 3.0
+- type: yolov8n_640x640_nv12_pipeline
+  time_ms_duration: 30.0
+targets:
+- type: laptop
+  track_id: 0
+  rois:
+  - type: laptop
+    rect:
+      x_offset: 0
+      y_offset: 136
+      height: 341
+      width: 135
+      do_rectify: false
+    confidence: 0.8185039758682251
+  attributes: []
+  points: []
+  captures: []
+- type: cup
+  track_id: 0
+  rois:
+  - type: cup
+    rect:
+      x_offset: 266
+      y_offset: 183
+      height: 122
+      width: 105
+      do_rectify: false
+    confidence: 0.6503147482872009
+  attributes: []
+  points: []
+  captures: []
+disappeared_targets: []
+---
+
+sunrise@rdk-x5:~$ sudo hrut_somstatus      # one sample; BPU load = 'ratio'
+=====================1=====================
+temperature-->
+	DDR      : 56.8 (C)
+55894
+	BPU      : 56.0 (C)
+	CPU      : 56.1 (C)
+cpu frequency-->
+	      min(M)	cur(M)	max(M)
+	cpu0: 300	1500	1500
+	cpu1: 300	1500	1500
+	cpu2: 300	1500	1500
+	cpu3: 300	1500	1500
+	cpu4: 300	1500	1500
+	cpu5: 300	1500	1500
+	cpu6: 300	1500	1500
+	cpu7: 300	1500	1500
+bpu status information---->
+	      min(M)	cur(M)	max(M)	ratio
+	bpu0: 500	1000	1000	21
+ddr frequency information---->
+	      min(M)	cur(M)	max(M)
+	ddr:  266	4266	4266

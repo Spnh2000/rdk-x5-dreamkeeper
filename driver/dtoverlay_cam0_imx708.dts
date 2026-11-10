@@ -1,0 +1,73 @@
+/*
+ * Raspberry Pi Camera Module 3 (Sony IMX708) on the RDK X5 CAM0 port.
+ * Modelled on D-Robotics' dtoverlay_cam0_imx477.dts (same 2-lane, 450 MHz
+ * link, 24 MHz clock); the driver is the RPi imx708 ported to the X5
+ * pipeline (robot-stack, 2026-10-15). The autofocus VCM (dw9807, 0x0c)
+ * is not declared here.
+ */
+/dts-v1/;
+/plugin/;
+
+/ {
+  fragment@0 {
+    target-path = "/";
+    __overlay__ {
+      imx708_clk0: imx708_clk0 {
+        compatible = "fixed-clock";
+        #clock-cells = <0>;
+        status = "okay";
+        clock-frequency = <24000000>;
+      };
+    };
+  };
+
+  fragment@1 {
+    target-path = "/soc/a55_apb0/i2c@341d0000/";
+    __overlay__ {
+
+      #address-cells = <1>;
+      #size-cells = <0>;
+
+      imx708@1a {
+        status = "okay";
+        compatible = "sony,imx708";
+        pinctrl-names = "default";
+        pinctrl-0 = <&lsio_gpio1_6>;
+        reset-gpios = <&ls_gpio1_porta 6 0>;	/* HIGH is ACTIVE LEVEL */
+        reg = <0x1a>;
+        clocks = <&imx708_clk0>;
+        clock-names = "inclk";
+
+        port {
+          /* MIPI CSI-2 bus endpoint */
+          imx708_to_mipi_csi0: endpoint {
+            remote-endpoint = <&x5_mipi_csi0_from_imx708>;
+            clock-lanes = <0>;
+            data-lanes = <1 2>;
+            link-frequencies = /bits/ 64 <450000000>;
+          };
+        };
+      };
+    };
+  };
+
+  fragment@3 {
+    target-path = "/soc/cam/csi@3d060000/";
+    __overlay__ {
+      status = "okay";
+
+      ports {
+        port {
+          x5_mipi_csi0_from_imx708: endpoint {
+            remote-endpoint = <&imx708_to_mipi_csi0>;
+            clock-lanes = <0>;
+            data-lanes = <1 2>;
+            lane-rate = <1125>;
+            vc_id = <0>;
+            stop_check_instart = <1>;
+          };
+        };
+      };
+    };
+  };
+};
