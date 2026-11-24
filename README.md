@@ -69,6 +69,19 @@ taken before the driver was set up. Do not repeat it on a running system: see
 strings (a disk volume serial, a network profile UUID) are greyed out in the
 screenshots.
 
+## Stage 2: robot design
+
+The next step turns this camera + AI pipeline into a robot: a **Fairino FR5**
+arm with a **Jodell EPG40-050** gripper and the RDK X5 + IMX708 camera on its
+wrist, sorting desk objects into bins.
+
+| Document | Content |
+|----------|---------|
+| [ROADMAP.md](ROADMAP.md) | milestones through the final demo |
+| [docs/stage2/PROPOSAL.md](docs/stage2/PROPOSAL.md) | concept, user, capabilities, innovation, measurable targets |
+| [docs/stage2/ARCHITECTURE.md](docs/stage2/ARCHITECTURE.md) | data flow, modules and failure modes, compute allocation, ROS 2 graph |
+| [docs/stage2/ENGINEERING_PLAN.md](docs/stage2/ENGINEERING_PLAN.md) | parts list, schedule, top five risks, repository structure |
+
 ## Setup
 
 Everything below runs **on the board** unless noted.
